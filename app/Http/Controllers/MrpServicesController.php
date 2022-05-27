@@ -117,6 +117,15 @@ class MrpServicesController extends Controller
             case 23:
                 $this->savePDFsNit($request);
                 break;
+            case 899:
+                $this->leerImagenesBE($request);
+                break;
+            case 900:
+                $this->subirImagenesBE($request);
+                break;
+            case 997:
+                $this->mrDatosEntorno($request);
+                break;
             default:
                 $response = array(
                     'type' => '0',
@@ -126,6 +135,54 @@ class MrpServicesController extends Controller
                 exit;
         }
     }
+
+    // Lee la condición del producto
+    public function mrDatosEntorno($rec)
+     {
+        $db_name = "mercadorepuesto_sys";
+        
+        $tiposvehiculos = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.text as label 
+                                                                      from ".$db_name.'.tiposvehiculos'." t0 
+                                                                      WHERE t0.estado = 1 ORDER BY orden ASC");
+
+        $marcasvehiculos = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.text as label  
+                                                                       from ".$db_name.'.marcas'." t0 
+                                                                       WHERE estado = 1 ORDER BY text ASC");
+
+        $carroceriasvehiculos = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.carroceria as label  
+                                                                            from ".$db_name.'.tiposcarrocerias'." t0 
+                                                                            WHERE estado = 1 ORDER BY carroceria ASC");
+        
+        $anosvehiculos = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.anovehiculo as label
+                                                                     from ".$db_name.".anosvehiculos t0 ORDER BY anovehiculo DESC");
+
+        $modelosvehiculos = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.modelo as label 
+                                                                        from ".$db_name.'.modelos'." t0 
+                                                                        WHERE estado = 1");
+
+        $versionmotor = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.cilindraje as label  
+                                                                    from ".$db_name.'.versionmotor'." t0 
+                                                                    WHERE t0.estado = 1");
+
+
+        $entorno = array(
+            'vgl_tiposvehiculos' => $tiposvehiculos,
+            'vgl_marcasvehiculos' => $marcasvehiculos,
+            'vgl_carroceriasvehiculos' => $carroceriasvehiculos,
+            'vgl_annosvehiculos' => $anosvehiculos,
+            'vgl_modelosvehiculos' => $modelosvehiculos,
+            'vgl_cilindrajesvehiculos' => $versionmotor,
+        );
+        
+        $datos = array();
+    
+        $datoc = [
+            'header_supplies' => $tiposvehiculos
+        ];
+        $datos[] = $datoc;
+    
+        echo json_encode($entorno);
+    }                                                            
 
     public function mrpCategorias($rec)
     {
@@ -482,8 +539,9 @@ class MrpServicesController extends Controller
 
     public function readWompi($rec)
     {
-        echo json_encode($rec);
-        exit;
+        //echo json_encode($rec);
+        //exit;
+
         $db_name = "mercadorepuesto_sys";
 
         $marcasvehiculos = DB::connection($this->cur_connect)->select("select t0.* from ".$db_name.'.marcas'." t0 WHERE tipovehiculo = ". $rec->idvehiculo);
@@ -1464,6 +1522,121 @@ exit;
         $rec->headers->set('Accept', 'application/json');
         echo json_encode($response);
         exit;
+    }
+
+    public function subirImagenesBE($rec)
+    {
+        //echo json_encode($rec);
+        //echo json_encode($rec->usuario);
+        //echo json_encode($rec->estado);
+//exit;
+        DB::beginTransaction();
+        try {
+                    $db_name = $this->db.".imagenesbe";
+                    $subirImagenes = new ModelGlobal();
+                    $subirImagenes->setConnection($this->cur_connect);
+                    $subirImagenes->setTable($db_name);
+                    //$extension = ".jpg";
+                    //$extension = $this->getB64Extension($rec->doc1);
+
+                    $subirImagenes->codigo = $rec->codigo;
+                    $subirImagenes->nombredocumento1 = $rec->nombredcto1;
+                    $subirImagenes->nombredocumento2 = $rec->nombredcto2;
+                    $subirImagenes->nombredocumento3 = $rec->nombredcto3;
+                    $subirImagenes->nombredocumento4 = $rec->nombredcto4;
+                    $subirImagenes->nombredocumento5 = $rec->nombredcto5;
+                    $subirImagenes->nombredocumento6 = $rec->nombredcto6;
+                    $subirImagenes->nombredocumento7 = $rec->nombredcto7;
+                    $subirImagenes->nombredocumento8 = $rec->nombredcto8;
+                    $subirImagenes->nombredocumento9 = $rec->nombredcto9;
+                    $subirImagenes->nombredocumento10 = $rec->nombredcto10;
+                    $subirImagenes->nombredocumento11 = $rec->nombredcto11;
+                    $subirImagenes->nombredocumento12 = $rec->nombredcto12;
+                    $subirImagenes->nombredocumento13 = $rec->nombredcto13;
+                    $subirImagenes->nombredocumento14 = $rec->nombredcto14;
+                    $subirImagenes->nombredocumento15 = $rec->nombredcto15;
+                    $subirImagenes->nombredocumento16 = $rec->nombredcto16;
+                    $subirImagenes->nombredocumento17 = $rec->nombredcto17;
+                    
+                    //Imagen base 64 se pasa a un arreglo
+                    $doc[1] = $rec->doc1;
+                    $doc[2] = $rec->doc2;
+                    $doc[3] = $rec->doc3;
+                    $doc[4] = $rec->doc4;
+                    $doc[5] = $rec->doc5;
+                    $doc[6] = $rec->doc6;
+                    $doc[7] = $rec->doc7;
+                    $doc[8] = $rec->doc8;
+                    $doc[9] = $rec->doc9;
+                    $doc[10] = $rec->doc10;
+                    $doc[11] = $rec->doc11;
+                    $doc[12] = $rec->doc12;
+                    $doc[13] = $rec->doc13;
+                    $doc[14] = $rec->doc14;
+                    $doc[15] = $rec->doc15;
+                    $doc[16] = $rec->doc16;
+                    $doc[17] = $rec->doc17;
+
+                    $nombreimagen[1]=$rec->nombredcto1;
+                    $nombreimagen[2]=$rec->nombredcto2;
+                    $nombreimagen[3]=$rec->nombredcto3;
+                    $nombreimagen[4]=$rec->nombredcto4;
+                    $nombreimagen[5]=$rec->nombredcto5;
+                    $nombreimagen[6]=$rec->nombredcto6;
+                    $nombreimagen[7]=$rec->nombredcto7;
+                    $nombreimagen[8]=$rec->nombredcto8;
+                    $nombreimagen[9]=$rec->nombredcto9;
+                    $nombreimagen[10]=$rec->nombredcto10;
+                    $nombreimagen[11]=$rec->nombredcto11;
+                    $nombreimagen[12]=$rec->nombredcto12;
+                    $nombreimagen[13]=$rec->nombredcto13;
+                    $nombreimagen[14]=$rec->nombredcto14;
+                    $nombreimagen[15]=$rec->nombredcto15;
+                    $nombreimagen[16]=$rec->nombredcto16;
+                    $nombreimagen[17]=$rec->nombredcto17;
+
+                    $subirImagenes->save();
+
+                    for ($i = 1; $i <= $rec->longitud; $i++) {               
+                        $this->GuardarIMG($doc[$i] ,$nombreimagen[$i],'mercadorepuesto/buscador/');
+                    //$response = FunctionsCustoms::UploadPDF($rec->doc1,'mercadorepuesto/pdf/');
+                    //$response = FunctionsCustoms::UploadPDF($rec->doc2,'mercadorepuesto/pdf/');
+                    //$response = FunctionsCustoms::UploadPDF($rec->doc3,'mercadorepuesto/pdf/');
+                    }
+
+        } catch (\Exception $e){
+
+            DB::rollBack();
+            $response = array(
+                'type' => '0',
+                'message' => "ERROR ".$e
+            );
+            $rec->headers->set('Accept', 'application/json');
+            echo json_encode($response);
+            exit;
+        }
+        DB::commit();
+        $response = array(
+            'type' => 1,
+            'message' => 'REGISTRO DOCUMENTOS EXITOSO',
+        );
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    public function leerImagenesBe($rec)
+    {
+        //echo json_encode($rec);
+        //exit;      
+        $db_name = "mercadorepuesto_sys";
+    
+        $consecutivoproducto = DB::connection($this->cur_connect)->select(
+                                              "select t0.*
+                                               from ".$db_name.'.imagenesbe'." 
+                                               t0 WHERE codigo = '". $rec->codigo."'"); 
+
+    echo json_encode($consecutivoproducto);
     }
 
 
