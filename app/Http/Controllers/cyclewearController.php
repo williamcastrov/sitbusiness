@@ -130,10 +130,13 @@ class cyclewearController extends Controller
             $this->readUserEmail($request);
                 break;
             case 100:
-                $this->listarCliente($request);
+                $this->listarInterlocutores($request);
                 break;
             case 101:
                 $this->crearCliente($request);
+                break;
+            case 102:
+                $this->cwrleerUnCliente($request);
                 break;
             case 110:
                 $this->cwrCrearInterlocutor($request);
@@ -144,6 +147,12 @@ class cyclewearController extends Controller
             case 112:
                 $this->cwrTiposInterlocutores($request);
                 break;
+            case 113:
+                $this->cwrCrearInterlocutorBE($request);
+                break;
+            case 114:
+                $this->cwrLeerInterlocutor($request);
+                break;    
             case 200:
                 $this->cwrBikeExchange($request);
                 break;
@@ -158,6 +167,9 @@ class cyclewearController extends Controller
                 break;
             case 204:
                 $this->cwrReadAdvertsVariants($request);
+                break;
+            case 205:
+                $this->cwrReadEnvoiceDate($request);
                 break;
             case 710:
                 $this->listaProductos($request);
@@ -507,6 +519,33 @@ class cyclewearController extends Controller
         echo $response;
     }
 
+    // Lee la condición del producto
+    public function cwrReadEnvoiceDate($rec)
+    {
+            $curl = curl_init();
+            $startdate =  $rec->fecha;
+
+            curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://www.bikeexchange.com.co/api/v2/client/invoices?since=".$startdate,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'MARKETPLACER-API-KEY: 4a99fa8c297af70d8878f255f096642b',
+                'Authorization: Basic e3t1c2VybmFtZX19Ont7cGFzc3dvcmR9fQ=='
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        echo $response;
+
+    }
     // Lee la condición del producto
     public function cwrReadAdverts($rec)
     {
@@ -929,6 +968,19 @@ class cyclewearController extends Controller
          exit;
     }
 
+    // Lee clientes en la BD local
+    public function cwrLeerInterlocutor($rec)
+    {
+        $db_name = "cyclewear_sys";
+    
+        $listarterceros = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.razonsocial as label,
+                                                                        concat(t0.nombres, ' ', t0.apellidos) as labeldos 
+                                                                        from ".$db_name.'.interlocutores'." t0
+                                                                        WHERE t0.tipotercero = '". $rec->tipotercero."'"); 
+    
+        echo json_encode($listarterceros);
+    }
+
     //Crear Interlocutor en Base de Datos Local
     public function cwrCrearInterlocutor($rec)
     {
@@ -989,7 +1041,69 @@ class cyclewearController extends Controller
          $rec->headers->set('Accept', 'application/json');
          echo json_encode($response);
          exit;
-     }
+    }
+
+     //Crear Interlocutor en Base de Datos Local tomados de BikeExchange
+    public function cwrCrearInterlocutorBE($rec)
+    {
+         DB::beginTransaction();
+         try {
+                     $db_name = $this->db.".interlocutores";
+                     $nuevoInterlocutor = new ModelGlobal();
+                     $nuevoInterlocutor->setConnection($this->cur_connect);
+                     $nuevoInterlocutor->setTable($db_name);
+
+                     $nuevoInterlocutor->tipotercero = $rec->tipotercero;
+                     $nuevoInterlocutor->tipopersona = $rec->tipotercero;
+                     $nuevoInterlocutor->tipoidentificacion = $rec->id_type;
+                     $nuevoInterlocutor->identificacion = $rec->identification;
+                     $nuevoInterlocutor->digitodeverificacion = $rec->check_digit;
+                     $nuevoInterlocutor->razonsocial = $rec->commercial_name;
+                     $nuevoInterlocutor->nombres = $rec->nombre;
+                     $nuevoInterlocutor->apellidos = $rec->apellido;
+                     $nuevoInterlocutor->nombrecomercial = $rec->commercial_name;
+                     $nuevoInterlocutor->sucursal = $rec->sucursal;
+                     $nuevoInterlocutor->estado = $rec->estado;
+                     $nuevoInterlocutor->ciudad = $rec->ciudad;
+                     $nuevoInterlocutor->direccion = $rec->address;
+                     $nuevoInterlocutor->indicativo = $rec->indicative;
+                     $nuevoInterlocutor->telefono = $rec->number;
+                     $nuevoInterlocutor->extension = $rec->extension;
+                     $nuevoInterlocutor->nombrescontacto = $rec->nombre;
+                     $nuevoInterlocutor->apellidoscontacto = $rec->apellido;
+                     $nuevoInterlocutor->correocontacto = $rec->email;
+                     $nuevoInterlocutor->tipoderegimen = $rec->tipoderegimen;
+                     $nuevoInterlocutor->codigoresponsabilidadfiscal = $rec->code;
+                     $nuevoInterlocutor->indicativofacturacion = $rec->indicativofacturacion;
+                     $nuevoInterlocutor->telefonofacturacion = $rec->number;
+                     $nuevoInterlocutor->codigopostalfacturacion = $rec->postal_code;
+                     $nuevoInterlocutor->usuarioasignado = $rec->usuarioasignado;
+                     $nuevoInterlocutor->observacion = $rec->comments;
+                     $nuevoInterlocutor->fechacreacion = $rec->fecha;
+                     $nuevoInterlocutor->fechamodificacion = $rec->fecha;
+          
+                     $nuevoInterlocutor->save();
+ 
+         } catch (\Exception $e){
+ 
+             DB::rollBack();
+             $response = array(
+                 'type' => '0',
+                 'message' => "ERROR ".$e
+             );
+             $rec->headers->set('Accept', 'application/json');
+             echo json_encode($response);
+             exit;
+         }
+         DB::commit();
+         $response = array(
+             'type' => 1,
+             'message' => 'REGISTRO EXITOSO',
+         );
+         $rec->headers->set('Accept', 'application/json');
+         echo json_encode($response);
+         exit;
+    }
     
     public function listaProductos($rec)
     {
@@ -1007,6 +1121,12 @@ class cyclewearController extends Controller
             $itemunico = array("code:"=>$items["code"],
                                "id:"=>$items["id"],
                                 "name:"=>$items["name"],
+                                "namedos:"=>$items["reference"],
+                                "adicional:"=>
+                                    @$items["additional_fields"][0]["barcode"] ?
+                                    $items["additional_fields"][0]["barcode"]
+                                    :
+                                    0,
                                "nombre:"=>
                                     @$items["prices"][0]["price_list"][0]["name"] ?
                                     $items["prices"][0]["price_list"][0]["name"]
@@ -1167,17 +1287,35 @@ class cyclewearController extends Controller
         echo $response;
     }
 
-    public function listarCliente($rec)
+    public function listarInterlocutores($rec)
     {
-        $url = $this->url_siigo_api."customers?identification=".$rec->identification;
+        $startdate =  $rec->fecha;
+        //url = $this->url_siigo_api."customers?identification=".$rec->identification;
+        //"https://api.siigo.com/v1/customers?created_start=2021-01-01&page=2&page_size=25"
+        
+        $url = $this->url_siigo_api."customers?created_start=".$startdate."&page=1&page_size=100";
         $response = FunctionsCustoms::SiigoGet($url,$this->db);
         $rec->headers->set('Accept', 'application/json');
         echo $response;
     }
 
+     // Lee un cliente en la BD Local
+     public function cwrleerUnCliente($rec)
+     {
+         $db_name = "cyclewear_sys";
+     
+         $consecutivoproducto = DB::connection($this->cur_connect)->select(
+                                               "select t0.id as value, t0.razonsocial as label, t0.*
+                                                from ".$db_name.'.interlocutores'." t0
+                                                WHERE identificacion = ".$rec->identificacion." 
+                                                   && tipotercero = '". $rec->tipotercero."'"); 
+ 
+     echo json_encode($consecutivoproducto);
+     }
+
     public function crearCliente($rec)
     {
-        $url = $this->url_siigo_api."customers";    
+        $url = $this->url_siigo_api."customers";
         $taxes_p = array();
         $priceslist_p = array();
         $prices_p = array();
@@ -1195,6 +1333,7 @@ class cyclewearController extends Controller
         //$prices_p[] = $pricesa;
 
         // "person_type" => '"'.$rec->person_type.'"',
+         
         $array_post = array(
             "type" => $rec->type,
             "person_type" => $rec->person_type,
@@ -1225,7 +1364,7 @@ class cyclewearController extends Controller
             "contacts" => array([
                 "first_name" => $rec->first_name,
                 "last_name" => $rec->last_name,
-                "email" => $rec->email,
+                "email" => 'wcastro@gmail.com',
                 "phone" => array(
                 "indicative" => $rec->indicative,
                 "number" => $rec->number,

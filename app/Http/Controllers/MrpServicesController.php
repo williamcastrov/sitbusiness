@@ -170,7 +170,6 @@ class MrpServicesController extends Controller
                                                                     from ".$db_name.'.versionmotor'." t0 
                                                                     WHERE t0.estado = 1");
 
-
         $entorno = array(
             'vgl_tiposvehiculos' => $tiposvehiculos,
             'vgl_marcasvehiculos' => $marcasvehiculos,
@@ -191,7 +190,7 @@ class MrpServicesController extends Controller
     }                                                            
 
     public function mrpCategorias($rec)
-    {
+    {   
         $db_name = "mercadorepuesto_sys";
 
         $categorias = DB::connection($this->cur_connect)->select("select t0.* from ".$db_name.'.categorias'." t0 WHERE t0.estado = 1");
@@ -587,7 +586,9 @@ class MrpServicesController extends Controller
         //echo $rec;
         //exit;
 
-        $productos = DB::connection($this->cur_connect)->select("select t0.*,
+        $aKeyword = explode(" ", $rec->name_contains);
+
+        $query = "select DISTINCT t0.id, t0.*,
             t0.id as idproducto,
             t1.text AS marca,
             t1.id AS id_marca,
@@ -598,9 +599,19 @@ class MrpServicesController extends Controller
             JOIN ".$db_name.'.tiposvehiculos'." t3 ON t0.tipovehiculo = t3.id
             JOIN ".$db_name.'.modelos'." t2 ON t0.modelo = t2.id
             WHERE t3.id = t1.tipovehiculo &&
-                  (t1.text LIKE '%".$rec->name_contains."%' ||
-                   t0.titulonombre LIKE '%".$rec->name_contains."%' ||
-                   t2.modelo LIKE '%".$rec->name_contains."%')  ");
+                  (t1.text LIKE '%".$aKeyword[0]."%' ||
+                   t0.titulonombre LIKE '%".$aKeyword[0]."%' ||
+                   t2.modelo LIKE '%".$aKeyword[0]."%')  ";
+
+                   for($i = 1; $i < count($aKeyword); $i++) {
+                    if(!empty($aKeyword[$i])) {
+                        $query .= " OR (t1.text LIKE '%".$aKeyword[$i]."%' ||
+                        t0.titulonombre LIKE '%".$aKeyword[$i]."%' ||
+                        t2.modelo LIKE '%".$aKeyword[$i]."%')";
+                    }
+                  }
+                
+        $productos = DB::connection($this->cur_connect)->select($query);
 /*
 echo "select t0.*,
             t0.id as idproducto,
