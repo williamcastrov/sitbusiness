@@ -38,7 +38,6 @@ class cyclewearController extends Controller
         $this->url_siigo_api = "https://api.siigo.com/v1/";
     }
 
-    
     /**
      * Display the specified resource.
      *
@@ -171,6 +170,9 @@ class cyclewearController extends Controller
             case 205:
                 $this->cwrReadEnvoiceDate($request);
                 break;
+            case 709:
+                $this->cwrIdentification($request);
+                break;
             case 710:
                 $this->listaProductos($request);
                 break;
@@ -185,6 +187,9 @@ class cyclewearController extends Controller
                 break;
             case 714:
                 $this->borrarProducto($request);
+                break;
+            case 729:
+                $this->crearFacturas($request);
                 break;
             case 730:
                 $this->listaFacturas($request);
@@ -437,6 +442,74 @@ class cyclewearController extends Controller
     
         echo json_encode($entorno);
     }
+
+     // Lee la condición del producto
+     public function cwrIdentification($rec)
+     {
+        $envoice = $rec->factura; // aqui consultas por la factura o el invoice
+        /////////////////////////////////////////////////////////////////
+        // Es necesario para siempre obtener el ultimo token actualizado
+        $curl = curl_init();
+        
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => 'http://45.33.26.241/api/login',
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'POST',
+          CURLOPT_POSTFIELDS =>'{
+            "username": "cyclewear",
+            "password": "cyclewear123*"
+        }',
+          CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json'
+          ),
+        ));
+        
+        $response = curl_exec($curl);
+        
+        curl_close($curl);
+        $data_token = json_decode($response); // Aqui obtengo el ultimo token actualizado
+        ////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////
+         $curl = curl_init();
+         
+         curl_setopt_array($curl, array(
+           CURLOPT_URL => 'http://45.33.26.241/api/Validations/GetByInvoice/'.$envoice,
+           CURLOPT_RETURNTRANSFER => true,
+           CURLOPT_ENCODING => '',
+           CURLOPT_MAXREDIRS => 10,
+           CURLOPT_TIMEOUT => 0,
+           CURLOPT_FOLLOWLOCATION => true,
+           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+           CURLOPT_CUSTOMREQUEST => 'GET',
+           //CURLOPT_HTTPHEADER => array(
+           //  'Authorization: Bearer eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiY3ljbGV3ZWFyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2VsbGVyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiJjOTA2OTczNi1jYTM2LTQ0Y2ItODZjNS1lYzBhZjcyY2JhNTQiLCJTZWxsZXIiOiIzODQxIiwiZXhwIjoxNjU1MzQxNTc3LCJpc3MiOiJ3d3cuYnl0ZWxhbmd1YWdlLm5ldCIsImF1ZCI6Ind3dy5ieXRlbGFuZ3VhZ2UubmV0In0.qdNpqp1p2t5ezQRnDSwDG3_Ujp0oarXi9gGpcxrTH0U'
+           //),
+           CURLOPT_HTTPHEADER => array(
+             'Authorization: Bearer '.$data_token->token
+           ),
+         ));
+         
+         $response = curl_exec($curl);
+         
+         curl_close($curl);
+         $data = json_decode($response);
+         // DATOS FINALES
+         //var_dump($data);
+         //echo "Name1: ". $name = $data[0]->name;
+         //echo "LastName 1: ". $lastName = $data[0]->lastName;
+         //echo "Email 1: ". $email = $data[0]->email;
+         echo "DocumentID 1: ". $documentId = $data[0]->documentId;
+         // Los otros datos
+         //echo "Name 2: ". $name = $data[1]->name;
+         //echo "LastName 2: ". $lastName = $data[1]->lastName;
+         //echo "Email 2: ". $email = $data[1]->email;
+         //echo "DocumentID 2: ". $documentId = $data[1]->documentId;
+     }
 
      // Lee la condición del producto
     public function cwrBikeExchange($rec)
@@ -1299,10 +1372,10 @@ class cyclewearController extends Controller
         echo $response;
     }
 
-     // Lee un cliente en la BD Local
-     public function cwrleerUnCliente($rec)
-     {
-         $db_name = "cyclewear_sys";
+    // Lee un cliente en la BD Local
+    public function cwrleerUnCliente($rec)
+    {
+      /*   $db_name = "cyclewear_sys";
      
          $consecutivoproducto = DB::connection($this->cur_connect)->select(
                                                "select t0.id as value, t0.razonsocial as label, t0.*
@@ -1310,8 +1383,8 @@ class cyclewearController extends Controller
                                                 WHERE identificacion = ".$rec->identificacion." 
                                                    && tipotercero = '". $rec->tipotercero."'"); 
  
-     echo json_encode($consecutivoproducto);
-     }
+     echo json_encode($consecutivoproducto);*/
+    }
 
     public function crearCliente($rec)
     {
@@ -1364,7 +1437,7 @@ class cyclewearController extends Controller
             "contacts" => array([
                 "first_name" => $rec->first_name,
                 "last_name" => $rec->last_name,
-                "email" => 'wcastro@gmail.com',
+                "email" => $rec->email,
                 "phone" => array(
                 "indicative" => $rec->indicative,
                 "number" => $rec->number,
@@ -1401,6 +1474,105 @@ class cyclewearController extends Controller
 
             );
         }
+        //cho json_encode($array_Resp);
+        echo json_encode($response);
+        //exit;
+    }
+
+    public function crearFacturas($rec)
+    {
+        $url = $this->url_siigo_api."invoices";
+        $taxes_p = array();
+        $priceslist_p = array();
+        $prices_p = array();
+        //echo $rec;
+        //exit;
+
+        // Impuestos array
+        //$taxesa = array('id' => 13156);
+        //$taxes_p[] = $taxesa;
+
+        // PriceList Array
+        //$priceslist_p[] = array('position' => 1, 'value' => $rec->precio1);
+        //$priceslist_p[] = array('position' => 2, 'value' => $rec->precio2);
+
+        // Prices Array
+        //$pricesa = array('currency_code' => 'COP', 'price_list' => $priceslist_p);
+        //$prices_p[] = $pricesa;
+
+        // "person_type" => '"'.$rec->person_type.'"',
+         
+        $array_post = array(
+            //"id" => 111222333444,
+            "document" =>  array(
+                "id" => 24446     
+            ),
+            //"number" => 22,
+            //"name" => "FV-2-22",
+            "date" => "2022-06-02",
+            "customer" => array(
+              "identification" => "4760027261",
+              "branch_office" => 0
+            ),
+            "cost_center" => 235,
+            "currency" => array(
+            "code" => "USD",
+            "exchange_rate" => 3825
+            ),
+            //"total" => 2544.22,
+            //"balance" => 0,
+            "seller" => 629,
+            "observations" => "Observaciones",
+            "items" => array([
+                  "code" => "100030853",
+                  "description" => "Camiseta de algodón",
+                  "quantity" => 2,
+                  "price" => 1069,
+                  "discount" => 0,
+                  "taxes" => array 
+                    ([
+                      "id" => 13156
+                    ])
+              ]),
+              "payments" => array([
+                  "id" => 5636,
+                  "value" => 2544.22,
+                  "due_date" => "2022-06-12",
+                  //"total" => 2544.22,
+              ]),
+              //"additional_fields" => ""
+        );
+
+        //echo json_encode($array_post);
+        //exit;
+
+        $response = FunctionsCustoms::SiigoPost($url,$this->db,$array_post);
+        $rec->headers->set('Accept', 'application/json');
+
+        echo json_encode($response);
+        exit;
+
+        $resp_crear = json_decode($response);
+
+        if(isset($resp_crear->id)){
+            $array_Resp = array("status" => 200, "id" => $resp_crear->id);
+            $response = array(
+                'type' => 1,
+                'message' => 'REGISTRO EXITOSO',
+                'id' => $resp_crear->id,
+                'status' => 200,
+            );
+        }else{
+            $array_Resp = array("status" => $resp_crear->Status, "id" => 0);
+            $response = array(
+                'type' => 0,
+                'message' => 'ERROR EN REGISTRO',
+                'id' => 0,
+                'status' => 0,
+
+            );
+        }
+        
         //cho json_encode($array_Resp);
         echo json_encode($response);
         //exit;
