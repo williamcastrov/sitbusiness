@@ -126,6 +126,9 @@ class cyclewearController extends Controller
             case 26:
                 $this->cwrListarResponsableIVA($request, $parametro);
                 break;
+            case 27:
+                $this->cwrListarProductoSIIGO($request, $parametro);
+                break;
             $this->readUserEmail($request);
                 break;
             case 100:
@@ -170,6 +173,17 @@ class cyclewearController extends Controller
             case 205:
                 $this->cwrReadEnvoiceDate($request);
                 break;
+            case 206:
+                $this->cwrCrearPedidosBD($request);
+                break;
+            case 207:
+                $this->cwrCrearItemsPedidosBD($request);                    
+                break;
+            case 208:
+                $this->listarComprobantes($request);                    
+                break;
+            case 209:
+                $this->listarPedidosDB($request);      
             case 709:
                 $this->cwrIdentification($request);
                 break;
@@ -446,6 +460,7 @@ class cyclewearController extends Controller
      // Lee la condición del producto
      public function cwrIdentification($rec)
      {
+        /*
         $envoice = $rec->factura; // aqui consultas por la factura o el invoice
         /////////////////////////////////////////////////////////////////
         // Es necesario para siempre obtener el ultimo token actualizado
@@ -475,9 +490,9 @@ class cyclewearController extends Controller
         $data_token = json_decode($response); // Aqui obtengo el ultimo token actualizado
         ////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////
-         $curl = curl_init();
+        $curl = curl_init();
          
-         curl_setopt_array($curl, array(
+        curl_setopt_array($curl, array(
            CURLOPT_URL => 'http://45.33.26.241/api/Validations/GetByInvoice/'.$envoice,
            CURLOPT_RETURNTRANSFER => true,
            CURLOPT_ENCODING => '',
@@ -486,30 +501,31 @@ class cyclewearController extends Controller
            CURLOPT_FOLLOWLOCATION => true,
            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
            CURLOPT_CUSTOMREQUEST => 'GET',
-           //CURLOPT_HTTPHEADER => array(
-           //  'Authorization: Bearer eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiY3ljbGV3ZWFyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2VsbGVyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiJjOTA2OTczNi1jYTM2LTQ0Y2ItODZjNS1lYzBhZjcyY2JhNTQiLCJTZWxsZXIiOiIzODQxIiwiZXhwIjoxNjU1MzQxNTc3LCJpc3MiOiJ3d3cuYnl0ZWxhbmd1YWdlLm5ldCIsImF1ZCI6Ind3dy5ieXRlbGFuZ3VhZ2UubmV0In0.qdNpqp1p2t5ezQRnDSwDG3_Ujp0oarXi9gGpcxrTH0U'
-           //),
            CURLOPT_HTTPHEADER => array(
-             'Authorization: Bearer '.$data_token->token
+             'Authorization: Bearer eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiY3ljbGV3ZWFyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2VsbGVyIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiI4ZmQzMGFkMC05MjhkLTQzNWEtYTk1OC00Zjk5ZGQ0MjAzNzgiLCJTZWxsZXIiOiIzODQxIiwiZXhwIjoxNjU1NTMxMjA5LCJpc3MiOiJ3d3cuYnl0ZWxhbmd1YWdlLm5ldCIsImF1ZCI6Ind3dy5ieXRlbGFuZ3VhZ2UubmV0In0.RId90qENIreYvnI1QA-wI_nh_6hzvccofANbRoDd7HQ'
            ),
-         ));
+           //CURLOPT_HTTPHEADER => array(
+           //  'Authorization: Bearer '.$data_token->token
+           //),
+        ));
          
-         $response = curl_exec($curl);
+        $response = curl_exec($curl);
          
-         curl_close($curl);
-         $data = json_decode($response);
-         // DATOS FINALES
-         //var_dump($data);
-         //echo "Name1: ". $name = $data[0]->name;
-         //echo "LastName 1: ". $lastName = $data[0]->lastName;
-         //echo "Email 1: ". $email = $data[0]->email;
-         echo "DocumentID 1: ". $documentId = $data[0]->documentId;
-         // Los otros datos
-         //echo "Name 2: ". $name = $data[1]->name;
-         //echo "LastName 2: ". $lastName = $data[1]->lastName;
-         //echo "Email 2: ". $email = $data[1]->email;
-         //echo "DocumentID 2: ". $documentId = $data[1]->documentId;
-     }
+        curl_close($curl);
+        $data = json_decode($response);
+        // DATOS FINALES
+        //var_dump($data);
+        //echo "Name1: ". $name = $data[0]->name;
+        //echo "LastName 1: ". $lastName = $data[0]->lastName;
+        //echo "Email 1: ". $email = $data[0]->email;
+        echo "DocumentID 1: ". $documentId = $data[0]->documentId;
+        // Los otros datos
+        //echo "Name 2: ". $name = $data[1]->name;
+        //echo "LastName 2: ". $lastName = $data[1]->lastName;
+        //echo "Email 2: ". $email = $data[1]->email;
+        //echo "DocumentID 2: ". $documentId = $data[1]->documentId;
+        */
+    }
 
      // Lee la condición del producto
     public function cwrBikeExchange($rec)
@@ -778,7 +794,133 @@ class cyclewearController extends Controller
         echo json_encode($response);
         exit;
     }
+
+    //Crear conscutivo en Base de Datos
+    public function cwrCrearPedidosBD($rec)
+    {
+
+        DB::beginTransaction();
+        try {
+                    $db_name = $this->db.".pedidos";
+                    $pedidosventa = new ModelGlobal();
+                    $pedidosventa->setConnection($this->cur_connect);
+                    $pedidosventa->setTable($db_name);
+
+                    $pedidosventa->id_fact = $rec->id_fact;
+                    $pedidosventa->id_siigo = $rec->id_siigo;
+                    $pedidosventa->comprobante = $rec->comprobante;
+                    $pedidosventa->prefijo = $rec->prefijo;
+                    $pedidosventa->facturasiigo = $rec->facturasiigo;
+                    $pedidosventa->fechafactura = $rec->fechafactura;
+                    $pedidosventa->idcliente = $rec->idcliente;
+                    $pedidosventa->valorfactura = $rec->valorfactura;
+                    $pedidosventa->descuento = $rec->descuento;
+                    $pedidosventa->cost_center = $rec->cost_center;
+                    $pedidosventa->seller = $rec->seller;
+                    $pedidosventa->valorimpuesto = $rec->valorimpuesto;
+                    $pedidosventa->porcentajeimpto = $rec->porcentajeimpto;
+                    $pedidosventa->Observaciones = $rec->Observaciones;
+
+                    $pedidosventa->save();
+
+        } catch (\Exception $e){
+
+            DB::rollBack();
+            $response = array(
+                'type' => '0',
+                'message' => "ERROR ".$e
+            );
+            $rec->headers->set('Accept', 'application/json');
+            echo json_encode($response);
+            exit;
+        }
+        DB::commit();
+        $response = array(
+            'type' => 1,
+            'message' => 'REGISTRO EXITOSO',
+        );
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($response);
+        exit;
+    }
     
+    // Lee la condición del producto
+    public function listarPedidosDB($rec)
+    {
+        $db_name = "cyclewear_sys";
+    
+        $listarpedidos = DB::connection($this->cur_connect)->select(
+                                              "select t0.* 
+                                               from ".$db_name.'.pedidos'." t0
+                                               WHERE id_fact = '". $rec->pedido."'"); 
+
+        echo json_encode($listarpedidos);
+    }
+    //Crear items de pedidos
+    public function cwrCrearItemsPedidosBD($rec)
+    {
+
+        DB::beginTransaction();
+        try {
+                $db_name = $this->db.".itemspedidos";
+                $itemspedidosventa = new ModelGlobal();
+                $itemspedidosventa->setConnection($this->cur_connect);
+                $itemspedidosventa->setTable($db_name);
+
+                $itemspedidosventa->itempedido = $rec->itempedido;
+                $itemspedidosventa->pedido = $rec->pedido;
+                $itemspedidosventa->advert_name = $rec->advert_name;
+                $itemspedidosventa->advert_code = $rec->advert_code;
+                $itemspedidosventa->brand_name = $rec->brand_name;
+                $itemspedidosventa->price = $rec->price;
+                $itemspedidosventa->quantity = $rec->quantity;
+                $itemspedidosventa->subtotal = $rec->subtotal;
+                $itemspedidosventa->tax_total = $rec->tax_total;
+                $itemspedidosventa->taxon_name = $rec->taxon_name;
+                $itemspedidosventa->total = $rec->total;
+                $itemspedidosventa->variant_barcode = $rec->variant_barcode;
+                $itemspedidosventa->variant_name = $rec->variant_name;
+                $itemspedidosventa->variant_sku = $rec->variant_sku;
+                $itemspedidosventa->codigoproductosiigo = $rec->codigoproductosiigo;
+                $itemspedidosventa->Observaciones = $rec->Observaciones;
+
+                $itemspedidosventa->save();
+
+        } catch (\Exception $e){
+
+            DB::rollBack();
+            $response = array(
+                'type' => '0',
+                'message' => "ERROR ".$e
+            );
+            $rec->headers->set('Accept', 'application/json');
+            echo json_encode($response);
+            exit;
+        }
+        DB::commit();
+        $response = array(
+            'type' => 1,
+            'message' => 'REGISTRO EXITOSO',
+        );
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+        // Lee la condición del producto
+        /*
+        public function listarPedidosDB($rec)
+        {
+            $db_name = "cyclewear_sys";
+        
+            $listarpedidos = DB::connection($this->cur_connect)->select(
+                                                  "select t0.* 
+                                                   from ".$db_name.'.pedidos'." t0
+                                                   WHERE id_fact = '". $rec->pedido."'"); 
+    
+            echo json_encode($listarpedidos);
+        }
+    */
      //Crear conscutivo en Base de Datos
     public function cwrCreateProduct($rec)
     {
@@ -917,6 +1059,22 @@ class cyclewearController extends Controller
                                                left join ".$db_name.'.categoriacuatro'." t5 ON t0.categoriacuatro = t5.id
                                                WHERE t0.estado = 1 ORDER BY idinterno DESC");
 
+        echo json_encode($listaproductos);
+
+    }
+
+    // Lee productos creados en la DB Local
+    public function cwrListarProductoSIIGO($rec)
+    {
+        //echo json_encode($rec->idinterno);
+        //exit;
+        $db_name = "cyclewear_sys";
+              
+        $listaproductos = DB::connection($this->cur_connect)->select(
+                                                "select t0.*
+                                                from ".$db_name.'.productos'." t0
+                                                WHERE t0.estado = 'Activo' ORDER BY codigo DESC");
+    
         echo json_encode($listaproductos);
     }
 
@@ -1177,6 +1335,54 @@ class cyclewearController extends Controller
          echo json_encode($response);
          exit;
     }
+
+    public function listarComprobantes($rec)
+    {
+        //created_start=2021-02-17
+        //$url = $this->url_siigo_api."document-types?type=FV"; ID COMPROBANTES
+        //$url = $this->url_siigo_api."users";
+        //$url = $this->url_siigo_api."payment-types?document_type=FV";
+        $url = $this->url_siigo_api."taxes";
+        $response = FunctionsCustoms::SiigoGet($url,$this->db);
+        echo $response;
+        exit;
+        // El objeto llega con String por eso no podias entrarle como un arreglo, con esta funcion la conviertes en un objecto accesible, y le agregas el segundo paramtro true para que seaun array manejable
+        //var_dump($data); // luego de convertilo en un array porque te lo devolvia como un string puedes explorar sus llaves y sus array y objetos con esta funcion y asi puedes ver hasta donde quieres llegar en este caso a el result pero el result tiene 17 array y tiene sque decirle cual array quieres acceder
+        //var_dump($data["results"][0]["code"]); // aqui acceso a el objecto results y luego al el array 0 y luego dentro de ese array cero es que encuentro en code
+        //var_dump($data);
+        //echo $data["results"][1]["code"];
+        //echo $data["results"][11]["code"];
+        $listaitems = array();
+        foreach($data["results"] as $items){
+            $itemunico = array("code:"=>$items["code"],
+                               "id:"=>$items["id"],
+                                "name:"=>$items["name"],
+                                "namedos:"=>$items["reference"],
+                                "adicional:"=>
+                                    @$items["additional_fields"][0]["barcode"] ?
+                                    $items["additional_fields"][0]["barcode"]
+                                    :
+                                    0,
+                               "nombre:"=>
+                                    @$items["prices"][0]["price_list"][0]["name"] ?
+                                    $items["prices"][0]["price_list"][0]["name"]
+                                    :
+                                    0,
+                                "valor:"=>
+                                    @$items["prices"][0]["price_list"][0]["value"] ?
+                                    $items["prices"][0]["price_list"][0]["value"]
+                                    :
+                                    0   
+        );
+            //    var_dump($items["prices"][0]["price_list"][0]["value"]); 
+            $listaitems[] = $itemunico;
+        };
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($listaitems);
+        //exit;
+        //$rec->headers->set('Accept', 'application/json');
+        //echo $response;
+    }
     
     public function listaProductos($rec)
     {
@@ -1375,15 +1581,15 @@ class cyclewearController extends Controller
     // Lee un cliente en la BD Local
     public function cwrleerUnCliente($rec)
     {
-      /*   $db_name = "cyclewear_sys";
+        $db_name = "cyclewear_sys";
      
-         $consecutivoproducto = DB::connection($this->cur_connect)->select(
+        $consecutivoproducto = DB::connection($this->cur_connect)->select(
                                                "select t0.id as value, t0.razonsocial as label, t0.*
                                                 from ".$db_name.'.interlocutores'." t0
                                                 WHERE identificacion = ".$rec->identificacion." 
                                                    && tipotercero = '". $rec->tipotercero."'"); 
  
-     echo json_encode($consecutivoproducto);*/
+        echo json_encode($consecutivoproducto);
     }
 
     public function crearCliente($rec)
@@ -1392,20 +1598,6 @@ class cyclewearController extends Controller
         $taxes_p = array();
         $priceslist_p = array();
         $prices_p = array();
-
-        // Impuestos array
-        //$taxesa = array('id' => 13156);
-        //$taxes_p[] = $taxesa;
-
-        // PriceList Array
-        //$priceslist_p[] = array('position' => 1, 'value' => $rec->precio1);
-        //$priceslist_p[] = array('position' => 2, 'value' => $rec->precio2);
-
-        // Prices Array
-        //$pricesa = array('currency_code' => 'COP', 'price_list' => $priceslist_p);
-        //$prices_p[] = $pricesa;
-
-        // "person_type" => '"'.$rec->person_type.'"',
          
         $array_post = array(
             "type" => $rec->type,
@@ -1487,58 +1679,40 @@ class cyclewearController extends Controller
         $prices_p = array();
         //echo $rec;
         //exit;
-
-        // Impuestos array
-        //$taxesa = array('id' => 13156);
-        //$taxes_p[] = $taxesa;
-
-        // PriceList Array
-        //$priceslist_p[] = array('position' => 1, 'value' => $rec->precio1);
-        //$priceslist_p[] = array('position' => 2, 'value' => $rec->precio2);
-
-        // Prices Array
-        //$pricesa = array('currency_code' => 'COP', 'price_list' => $priceslist_p);
-        //$prices_p[] = $pricesa;
-
-        // "person_type" => '"'.$rec->person_type.'"',
          
         $array_post = array(
-            //"id" => 111222333444,
             "document" =>  array(
-                "id" => 24446     
+                "id" => $rec->id,
             ),
-            //"number" => 22,
-            //"name" => "FV-2-22",
-            "date" => "2022-06-02",
+            "date" => $rec->date,
             "customer" => array(
-              "identification" => "4760027261",
+              "identification" => $rec->identification,
               "branch_office" => 0
             ),
-            "cost_center" => 235,
-            "currency" => array(
-            "code" => "USD",
-            "exchange_rate" => 3825
-            ),
+            "cost_center" => $rec->cost_center,
+            //"currency" => array(
+            //"code" => "USD",
+            //"exchange_rate" => 3825
+            //),
             //"total" => 2544.22,
             //"balance" => 0,
-            "seller" => 629,
-            "observations" => "Observaciones",
+            "seller" => $rec->seller,
+            "observations" => $rec->observations,
             "items" => array([
-                  "code" => "100030853",
-                  "description" => "Camiseta de algodón",
-                  "quantity" => 2,
-                  "price" => 1069,
-                  "discount" => 0,
+                  "code" => $rec->code,
+                  "description" => $rec->description,
+                  "quantity" =>$rec->quantity,
+                  "price" => $rec->price,
+                  "discount" => $rec->discount,
                   "taxes" => array 
                     ([
-                      "id" => 13156
+                      "id" => $rec->idtaxes,
                     ])
               ]),
               "payments" => array([
-                  "id" => 5636,
-                  "value" => 2544.22,
-                  "due_date" => "2022-06-12",
-                  //"total" => 2544.22,
+                  "id" => $rec->idpayments,
+                  "value" => $rec->value,
+                  "due_date" => $rec->due_date,
               ]),
               //"additional_fields" => ""
         );
@@ -1572,9 +1746,83 @@ class cyclewearController extends Controller
 
             );
         }
-        
         //cho json_encode($array_Resp);
         echo json_encode($response);
         //exit;
+    }
+
+    public function crearFacturasItems($rec)
+    {
+        $url = $this->url_siigo_api."invoices";
+        $taxes_p = array();
+        $priceslist_p = array();
+        $prices_p = array();
+
+        $db_name = "cyclewear_sys";
+     
+        $itemspedidos = DB::connection($this->cur_connect)->select(
+                                               "select t0.*
+                                                from ".$db_name.'.itemspedidos'." t0
+                                                WHERE pedido = '". $rec->pedido."'"); 
+ 
+        //$data = json_decode($itemspedidos, true); // El objeto llega con String por eso no podias entrarle como un arreglo, con esta funcion la conviertes en un objecto accesible, y le agregas el segundo paramtro true para que seaun array manejable
+        //var_dump($data); // luego de convertilo en un array porque te lo devolvia como un string puedes explorar sus llaves y sus array y objetos con esta funcion y asi puedes ver hasta donde quieres llegar en este caso a el result pero el result tiene 17 array y tiene sque decirle cual array quieres acceder
+        //var_dump($data["results"][0]["code"]); // aqui acceso a el objecto results y luego al el array 0 y luego dentro de ese array cero es que encuentro en code
+        //var_dump($data);
+        //echo $data["results"][1]["code"];
+        //echo $data["results"][11]["code"];
+
+        $listaitems = array();
+
+        foreach($itemspedidos as $modelo) {
+            // Inicio Foreach CAT AQUI
+            //"items" => array([
+            $cat_pro = array("code" =>$modelo->codigoproductosiigo,
+                             "description" =>$modelo->advert_name,
+                             "quantity" =>$modelo->quantity,
+                             "price" => $modelo->subtotal,
+                             "discount" => "0",
+                             "taxes" => array 
+                              ([
+                                "id" => "745",
+                              ])
+                            );
+            $listaitems[] = $cat_pro;
+            // Fin Foreach CAT AQUI
+        }
+
+        $array_post = array(
+            "document" =>  array(
+                "id" => $rec->id,
+            ),
+            "date" => $rec->date,
+            "customer" => array(
+              "identification" => $rec->identification,
+              "branch_office" => 0
+            ),
+            "cost_center" => $rec->cost_center,
+            //"currency" => array(
+            //"code" => "USD",
+            //"exchange_rate" => 3825
+            //),
+            //"total" => 2544.22,
+            //"balance" => 0,
+            "seller" => $rec->seller,
+            "observations" => $rec->observations,
+            "items" => $listaitems,
+              "payments" => array([
+                  "id" => $rec->idpayments,
+                  "value" => $rec->value,
+                  "due_date" => $rec->due_date,
+              ]),
+              //"additional_fields" => ""
+        );
+
+
+        echo json_encode($array_post);
+        exit;
+
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($listaitems);
     }
 }
