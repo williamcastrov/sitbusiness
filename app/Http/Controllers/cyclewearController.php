@@ -1342,7 +1342,8 @@ class cyclewearController extends Controller
         //$url = $this->url_siigo_api."document-types?type=FV"; ID COMPROBANTES
         //$url = $this->url_siigo_api."users";
         //$url = $this->url_siigo_api."payment-types?document_type=FV";
-        $url = $this->url_siigo_api."taxes";
+        //$url = $this->url_siigo_api."taxes";
+        $url = $this->url_siigo_api."warehouses";
         $response = FunctionsCustoms::SiigoGet($url,$this->db);
         echo $response;
         exit;
@@ -1703,6 +1704,7 @@ class cyclewearController extends Controller
                   "description" => $rec->description,
                   "quantity" =>$rec->quantity,
                   "price" => $rec->price,
+                  "warehouse" => 5,     
                   "discount" => $rec->discount,
                   "taxes" => array 
                     ([
