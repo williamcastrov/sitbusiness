@@ -819,7 +819,7 @@ class cyclewearController extends Controller
                     $pedidosventa->seller = $rec->seller;
                     $pedidosventa->valorimpuesto = $rec->valorimpuesto;
                     $pedidosventa->porcentajeimpto = $rec->porcentajeimpto;
-                    $pedidosventa->Observaciones = $rec->Observaciones;
+                    $pedidosventa->Observaciones = $rec->observaciones;
 
                     $pedidosventa->save();
 
@@ -882,7 +882,8 @@ class cyclewearController extends Controller
                 $itemspedidosventa->variant_name = $rec->variant_name;
                 $itemspedidosventa->variant_sku = $rec->variant_sku;
                 $itemspedidosventa->codigoproductosiigo = $rec->codigoproductosiigo;
-                $itemspedidosventa->Observaciones = $rec->Observaciones;
+                $itemspedidosventa->direccion = $rec->direccion;
+                $itemspedidosventa->observaciones = $rec->observaciones;
 
                 $itemspedidosventa->save();
 

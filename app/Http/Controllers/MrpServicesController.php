@@ -1352,7 +1352,9 @@ exit;
                     $extension = $this->getB64Extension($rec->imagen1);
 
                     //$crearProducto->url = $rec->uid;
+                    
                     $crearProducto->productogenerico = $rec->productogenerico;
+                    
                     $crearProducto->tipovehiculo = $rec->tipovehiculo;
                     $crearProducto->carroceria = $rec->carroceria;
                     $crearProducto->marca = $rec->marca;
@@ -1361,29 +1363,29 @@ exit;
                     $crearProducto->cilindrajemotor = $rec->cilindrajemotor;
                     $crearProducto->tipocombustible = $rec->tipocombustible;
                     $crearProducto->transmision = $rec->transmision;
-                    $crearProducto->partedelvehiculo = $rec->partedelvehiculo;
+                    $crearProducto->tipotraccion = $rec->tipotraccion;
+                    $crearProducto->turbocompresor = $rec->turbocompresor;
                     $crearProducto->posicionproducto = $rec->posicionproducto;
+                    $crearProducto->partedelvehiculo = $rec->partedelvehiculo;
                     $crearProducto->titulonombre = $rec->titulonombre;
                     $crearProducto->marcarepuesto = $rec->marcarepuesto;
                     $crearProducto->condicion = $rec->condicion;
                     $crearProducto->estadoproducto = $rec->estadoproducto;
+                    $crearProducto->vendeporpartes = $rec->vendeporpartes;
+                    $crearProducto->numerodeparte = $rec->numerodeparte;
                     $crearProducto->numerodeunidades = $rec->numerodeunidades;
                     $crearProducto->precio = $rec->precio;
-                    $crearProducto->numerodeparte = $rec->numerodeparte;
                     $crearProducto->compatible = $rec->compatible;
-                    $crearProducto->descripcionproducto = $rec->descripciondelproducto;
-                    $crearProducto->vendeporpartes = $rec->vendeporpartes;
+                    $crearProducto->descripcionproducto = $rec->descripcionproducto;
                     $crearProducto->peso = $rec->peso;
                     $crearProducto->alto = $rec->alto;
                     $crearProducto->ancho = $rec->ancho;
                     $crearProducto->largo = $rec->largo;
-                    //$crearProducto->productofuncional = $rec->productofuncional;
-                    $crearProducto->tipotraccion = $rec->tipotraccion;
-                    $crearProducto->turbocompresor = $rec->turbocompresor;
                     $crearProducto->descuento = $rec->descuento;
                     $crearProducto->usuario = $rec->usuario;
                     $crearProducto->moneda = $rec->moneda;
                     $crearProducto->estado = $rec->estado;
+    
                     $crearProducto->numerodeimagenes = $rec->longitud;
                     $crearProducto->nombreimagen1 = $rec->nombreimagen1;
                     $crearProducto->nombreimagen2 = $rec->nombreimagen2;
