@@ -117,6 +117,12 @@ class MrpServicesController extends Controller
             case 23:
                 $this->savePDFsNit($request);
                 break;
+            case 24:
+                $this->createVehiculosCompatibles($request);
+                break;
+            case 25:
+                 $this->getPublication($request, $parametro);
+                break;            
             case 897:
                 $this->leerImagenesLatInt($request);
                 break;
@@ -169,6 +175,13 @@ class MrpServicesController extends Controller
         $versionmotor = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.cilindraje as label  
                                                                     from ".$db_name.'.versionmotor'." t0 
                                                                     WHERE t0.estado = 1");
+        
+        $categorias = DB::connection($this->cur_connect)->select("select t0.*, t0.id as value, t0.nombre as label 
+                                                                    from ".$db_name.'.categorias'." t0 
+                                                                    WHERE estado = 1");
+        $subcategorias = DB::connection($this->cur_connect)->select("select t0.*, t0.id_categorias as value, t0.nombre as label 
+                                                                    from ".$db_name.'.subcategorias'." t0 
+                                                                    WHERE estado = 1");
 
         $entorno = array(
             'vgl_tiposvehiculos' => $tiposvehiculos,
@@ -177,6 +190,8 @@ class MrpServicesController extends Controller
             'vgl_annosvehiculos' => $anosvehiculos,
             'vgl_modelosvehiculos' => $modelosvehiculos,
             'vgl_cilindrajesvehiculos' => $versionmotor,
+            'vgl_categorias' => $categorias, 
+            'vgl_subcategorias' => $subcategorias,
         );
         
         $datos = array();
@@ -612,8 +627,7 @@ class MrpServicesController extends Controller
                   }
                 
         $productos = DB::connection($this->cur_connect)->select($query);
-/*
-echo "select t0.*,
+        /*echo "select t0.*,
             t0.id as idproducto,
             t1.text AS marca,
             t1.id AS id_marca,
@@ -627,8 +641,8 @@ echo "select t0.*,
                   (t1.text LIKE '%".$rec->name_contains."%' ||
                    t0.titulonombre LIKE '%".$rec->name_contains."%' ||
                    t2.modelo LIKE '%".$rec->name_contains."%')  ";
-exit;
-*/
+        exit;
+        */
          //t0.titulonombre LIKE '%".$rec->name_contains."%'
 
         //echo json_encode($productos);
@@ -864,10 +878,10 @@ exit;
             //////////////////////////
             // FIN FOREACH PRODUCTOS
 
-}
+        }
 
 
-/*
+        /*
         //echo json_encode($rec->productogenerico);
         //exit;
         DB::beginTransaction();
@@ -900,6 +914,282 @@ exit;
         $rec->headers->set('Accept', 'application/json');
         echo json_encode($product);
         exit;
+    }
+
+    //Lee una publicación
+    public function getPublication($rec, $parametro)
+    {
+       ///////////////////////////////////
+        /// INICIO DE FOREACH DE PRODUCTOS
+        //////////////////////////////////
+
+        $db_name = "mercadorepuesto_sys";
+        $url_img = '/files/mercadorepuesto/';
+        //echo $variable = json_decode($parametro);
+        //echo $rec->idarticulo;
+        //exit;
+
+        $productos = DB::connection($this->cur_connect)->select("select t0.*,
+        t0.id as idproducto,
+        t1.text AS marca,
+        t1.id AS id_marca,
+        t2.id AS id_modelos,
+        t2.modelo AS modelos
+        from ".$db_name.'.productos'." t0
+        JOIN ".$db_name.'.tiposvehiculos'." t3 ON t0.tipovehiculo = t3.id
+        JOIN ".$db_name.'.marcas'." t1 ON t0.marca = t1.id
+        JOIN ".$db_name.'.modelos'." t2 ON t0.modelo = t2.id
+        WHERE t0.compatible IN ".$rec->idarticulo);
+
+        //WHERE t0.id = ".$rec->idarticulo);
+        //echo json_encode($productos);
+        //exit;
+        //$variable = json_decode($parametro);
+        //echo $variable->name_contains;
+        //exit;
+        $product = array();
+
+        foreach($productos as $producto) {
+        //Imagenes
+        $img = array();
+        $product_categories = array();
+        $product_brands =array();
+        //echo json_encode($extension);
+        //exit;
+
+        $nombrefoto[1] = $producto->nombreimagen1;
+        $nombrefoto[2] = $producto->nombreimagen2;
+        $nombrefoto[3] = $producto->nombreimagen3;
+        $nombrefoto[4] = $producto->nombreimagen4;
+        $nombrefoto[5] = $producto->nombreimagen5;
+        $nombrefoto[6] = $producto->nombreimagen6;
+        $nombrefoto[7] = $producto->nombreimagen7;
+        $nombrefoto[8] = $producto->nombreimagen8;
+        $nombrefoto[9] = $producto->nombreimagen9;
+        $nombrefoto[10] = $producto->nombreimagen10;
+
+        //for ($i = 1; $i <= $producto->numerodeimagenes; $i++) {
+        //for ($i = 1; $i <= 2; $i++) {
+        for ($i = 1; $i <= $producto->numerodeimagenes; $i++) {
+        // Foreach AQUI
+        $img_name = explode(".", $nombrefoto[$i]);
+        $formats_thumbnail = array('name' => $nombrefoto[$i],
+                                'hash' => $img_name[0],
+                                'ext' =>  ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 156,
+                                'height' => 156,
+                                'size' => number_format(1.52),
+                                'path' => null,
+                                'url' => $url_img.$nombrefoto[$i]);
+
+        $formats_large = array('name' => $nombrefoto[$i],
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 1000,
+                                'height' => 1000,
+                                'size' => number_format(18.15),
+                                'path' => null,
+                                'url' => $url_img.$nombrefoto[$i]);
+
+        $formats_medium = array('name' => $nombrefoto[$i],
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 750,
+                                'height' => 750,
+                                'size' => number_format(11.54),
+                                'path' => null,
+                                'url' => $url_img.$nombrefoto[$i]);
+
+        $formats_small = array('name' => $nombrefoto[$i],
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 500,
+                                'height' => 500,
+                                'size' => number_format(6.23),
+                                'path' => null,
+                                'url' => $url_img.$nombrefoto[$i]);
+
+        $formats_img_data = array('thumbnail' => $formats_thumbnail,
+                             'large' => $formats_large,
+                             'medium' => $formats_medium,
+                             'small' => $formats_small);
+        $formats_img = $formats_img_data;
+
+        $imgdata = array('id' => $i,
+                     'name' => $nombrefoto[$i],
+                     'alternativeText' => $producto->titulonombre,
+                     'caption' => $this->string2url($producto->titulonombre),
+                     'width' => 1200,
+                     'height' => 1200,
+                     'formats' => $formats_img,
+                     'hash' => $img_name[0],
+                     'ext' => ".".$img_name[1],
+                     'mime' => 'image/jpeg',
+                     'size' => number_format(23.67),
+                     'url' => $url_img.$nombrefoto[$i],
+                     'previewUrl' => null,
+                     'provider' => 'local',
+                     'provider_metadata' => null,
+                     'created_at' => '2021-06-12T09:17:55.793Z',
+                     'updated_at' => date("Y-m-d").'T09:17:55.815Z');
+        $img[] = $imgdata;
+        }
+        $img_name = explode(".", $producto->nombreimagen1);
+        $thumbnail_thumbnail = array('name' => $producto->nombreimagen1,
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 156,
+                                'height' => 156,
+                                'size' => number_format(1.52),
+                                'path' => null,
+                                'url' => $url_img.$producto->nombreimagen1);
+
+        $thumbnail_large = array('name' => $producto->nombreimagen1,
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 1000,
+                                'height' => 1000,
+                                'size' => number_format(18.15),
+                                'path' => null,
+                                'url' => $url_img.$producto->nombreimagen1);
+
+        $thumbnail_medium = array('name' => $producto->nombreimagen1,
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 750,
+                                'height' => 750,
+                                'size' => number_format(11.54),
+                                'path' => null,
+                                'url' => $url_img.$producto->nombreimagen1);
+
+        $thumbnail_small = array('name' => $producto->nombreimagen1,
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'width' => 500,
+                                'height' => 500,
+                                'size' => number_format(6.23),
+                                'path' => null,
+                                'url' => $url_img.$producto->nombreimagen1);
+
+        $thumbnail_formats_img_data = array('thumbnail' => $thumbnail_thumbnail,
+                             'large' => $thumbnail_large,
+                             'medium' => $thumbnail_medium,
+                             'small' => $thumbnail_small);
+
+        $thumbnail_img = array('id' => 1,
+                               'name' => $producto->nombreimagen1,
+                               'alternativeText' => $producto->titulonombre,
+                               'caption' => $this->string2url($producto->titulonombre),
+                               'width' => 1200,
+                               'height' => 1200,
+                               'formats' => $thumbnail_formats_img_data,
+                               'hash' => $img_name[0],
+                               'ext' => ".".$img_name[1],
+                               'mime' => 'image/jpeg',
+                               'size' => number_format(23.67),
+                               'url' => $url_img.$producto->nombreimagen1,
+                               'previewUrl' => null,
+                               'provider' => 'local',
+                               'provider_metadata' => null,
+                               'created_at' => '2021-06-12T09:17:55.793Z',
+                               'updated_at' => date("Y-m-d").'T09:17:55.815Z'
+                                );
+
+        $thumbnail_back = array('id' => 1,
+                                'name' => $producto->nombreimagen1,
+                                'alternativeText' => $producto->titulonombre,
+                                'caption' => $this->string2url($producto->titulonombre),
+                                'width' => 1200,
+                                'height' => 1200,
+                                'formats' => $thumbnail_formats_img_data,
+                                'hash' => $img_name[0],
+                                'ext' => ".".$img_name[1],
+                                'mime' => 'image/jpeg',
+                                'size' => number_format(23.67),
+                                'url' => $url_img.$producto->nombreimagen1,
+                                'previewUrl' => null,
+                                'provider' => 'local',
+                                'provider_metadata' => null,
+                                'created_at' => '2021-06-12T09:17:55.793Z',
+                                'updated_at' => date("Y-m-d").'T09:17:55.815Z'
+                                );
+        // Fin Foreach IMG AQUI
+
+        $modelos = DB::connection($this->cur_connect)->select("
+            select t0.* FROM ".$db_name.'.modelos'." t0
+            JOIN ".$db_name.'.marcas'." t1 ON t0.marca = t1.id
+            JOIN ".$db_name.'.tiposvehiculos'." t3 ON t3.id = t1.tipovehiculo
+            WHERE t0.marca = '".$producto->id_marca."' AND t0.id = '".$producto->modelo."' ORDER BY t0.marca ASC");
+
+        foreach($modelos as $modelo) {
+        // Inicio Foreach CAT AQUI
+        $cat_pro = array('id' => $modelo->id,
+                         'name' => $modelo->modelo,
+                         'slug' => $this->string2url($modelo->modelo),
+                         'created_at' => '2021-06-12T08:53:06.932Z',
+                         'updated_at' => date("Y-m-d").'T08:53:06.943Z');
+        $product_categories[] = $cat_pro;
+        // Fin Foreach CAT AQUI
+        }
+
+        // Inicio Foreach Marcas
+        $brand = array('id' => $producto->id_marca,
+                       'name' => $producto->marca,
+                       'slug' => $this->string2url($producto->marca),
+                       'created_at' => date("Y-m-d").'T10:56:52.945Z',
+                        'updated_at' => date("Y-m-d").'T10:58:02.351Z');
+        $product_brands[] = $brand;
+        // Fin Foreach Marcas
+
+        // Imagenes
+
+            $datoproduct = [
+            'id' => $producto->idproducto,
+            'name' => $producto->titulonombre,
+            'featured' => false,
+            'price' => $producto->precio,
+            'sale_price' => $producto->precio,
+            'numerounidades' => $producto->numerodeunidades,
+            'on_sale' => true,
+            'slug' => $this->string2url($producto->titulonombre),
+            'is_stock' => true,
+            'rating_count' => 9,
+            'description' => 'Los autos están expuestos a diario a sufrir una falla o
+             verse involucrados en accidentes de tránsito, y  dependiendo del nivel de
+            daño, se requiere sustituir piezas. Para los fabricantes y talleres es
+            importante tratar de devolver el auto a sus condiciones iniciales.,',
+            'short_description' => 'La industria automotriz está implementando nuevos sistemas modulares  para reducir el costo de producción',
+            'created_at' => '2021-06-12T09:24:14.184Z',
+            'updated_at' => '2021-06-12T11:06:51.663Z',
+            'sizes' => array(),
+            'colors' => array(),
+            'badges' => array(),
+            'images' => $img,
+            'thumbnail' => $thumbnail_img,
+            'thumbnail_back' => $thumbnail_back,
+            'collections' => array(),
+            'product_categories' => $product_categories,
+            'product_brands' => $product_brands,
+            ];
+            $product[] = $datoproduct;
+
+            //////////////////////////
+            // FIN FOREACH PRODUCTOS
+
+        }
+
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($product);
+        exit;
+       
     }
 
     //Lee Productos de la Base de Datos
@@ -1169,39 +1459,8 @@ exit;
             //////////////////////////
             // FIN FOREACH PRODUCTOS
 
-}
-
-
-/*
-        //echo json_encode($rec->productogenerico);
-        //exit;
-        DB::beginTransaction();
-        try {
-                    $db_name = $this->db.".productos";
-                    $nuevoProducto = new ModelGlobal();
-                    $nuevoProducto->setConnection($this->cur_connect);
-                    $nuevoProducto->setTable($db_name);
-
-                    $nuevoProducto->id = $rec->id;
-
-                    $nuevoProducto->save();
-
-        } catch (\Exception $e){
-
-            DB::rollBack();
-            $response = array(
-                'type' => '0',
-                'message' => "ERROR ".$e
-            );
-            $rec->headers->set('Accept', 'application/json');
-            echo json_encode($response);
-            exit;
         }
-        DB::commit();
-        $response = array(
-            'type' => 1,
-            'message' => 'REGISTRO DE PRODUCTO EXITOSO',
-        );*/
+
         $rec->headers->set('Accept', 'application/json');
         echo json_encode($product);
         exit;
@@ -1274,7 +1533,7 @@ exit;
         //echo json_encode($rec);
         //echo json_encode($rec->usuario);
         //echo json_encode($rec->estado);
-//exit;
+        //exit;
         DB::beginTransaction();
         try {
                     $db_name = $this->db.".documentoscrearnit";
@@ -1445,6 +1704,55 @@ exit;
         $response = array(
             'type' => 1,
             'message' => 'REGISTRO FOTOS EXITOSO',
+        );
+        $rec->headers->set('Accept', 'application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    public function createVehiculosCompatibles($rec)
+    {
+        //echo json_encode($rec->estado);
+        //exit;
+        DB::beginTransaction();
+        try {
+                    $db_name = $this->db.".productosvehiculos";
+                    $compatibles = new ModelGlobal();
+                    $compatibles->setConnection($this->cur_connect);
+                    $compatibles->setTable($db_name);
+
+                    $compatibles->codigopublicacion = $rec->codigopublicacion;
+                    $compatibles->tipovehiculo = $rec->tipovehiculo;
+                    $compatibles->carroceria = $rec->carroceria;
+                    $compatibles->marca = $rec->marca;
+                    $compatibles->anno = $rec->anno;
+                    $compatibles->modelo = $rec->modelo;
+                    $compatibles->cilindrajemotor = $rec->cilindrajemotor;
+                    $compatibles->tipocombustible = $rec->tipocombustible;
+                    $compatibles->transmision = $rec->transmision;
+                    $compatibles->partedelvehiculo = $rec->partedelvehiculo;
+                    $compatibles->posicionproducto = $rec->posicionproducto;
+                    $compatibles->tipotraccion = $rec->tipotraccion;
+                    $compatibles->turbocompresor = $rec->turbocompresor;
+                    $compatibles->usuario = $rec->usuario;
+
+                    $compatibles->save();
+
+        } catch (\Exception $e){
+
+            DB::rollBack();
+            $response = array(
+                'type' => '0',
+                'message' => "ERROR ".$e
+            );
+            $rec->headers->set('Accept', 'application/json');
+            echo json_encode($response);
+            exit;
+        }
+        DB::commit();
+        $response = array(
+            'type' => 1,
+            'message' => 'REGISTRO VEHICULOS COMPATIBLES EXITOSO',
         );
         $rec->headers->set('Accept', 'application/json');
         echo json_encode($response);

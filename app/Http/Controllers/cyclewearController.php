@@ -183,7 +183,14 @@ class cyclewearController extends Controller
                 $this->listarComprobantes($request);                    
                 break;
             case 209:
-                $this->listarPedidosDB($request);      
+                $this->listarUnPedidoDB($request);   
+                break;   
+            case 210:
+                $this->listarPedidosDB($request);   
+                break;
+            case 211:
+                $this->listarItemsPedidosDB($request);   
+                break;
             case 709:
                 $this->cwrIdentification($request);
                 break;
@@ -843,18 +850,42 @@ class cyclewearController extends Controller
         echo json_encode($response);
         exit;
     }
-    
+
     // Lee la condición del producto
     public function listarPedidosDB($rec)
     {
         $db_name = "cyclewear_sys";
-    
+        
         $listarpedidos = DB::connection($this->cur_connect)->select(
+                                                "select t0.* 
+                                                from ".$db_name.'.pedidos'." t0 "); 
+    
+        echo json_encode($listarpedidos);
+    }
+
+    // Lee la condición del producto
+    public function listarItemsPedidosDB($rec)
+    {
+        $db_name = "cyclewear_sys";
+            
+         $listaritemspedidos = DB::connection($this->cur_connect)->select(
+                                                "select t0.* 
+                                                from ".$db_name.'.itemspedidos'." t0 "); 
+        
+        echo json_encode($listaritemspedidos);
+    }
+    
+    // Lee la condición del producto
+    public function listarUnPedidoDB($rec)
+    {
+        $db_name = "cyclewear_sys";
+    
+        $listarunpedido = DB::connection($this->cur_connect)->select(
                                               "select t0.* 
                                                from ".$db_name.'.pedidos'." t0
                                                WHERE id_fact = '". $rec->pedido."'"); 
 
-        echo json_encode($listarpedidos);
+        echo json_encode($listarunpedido);
     }
     //Crear items de pedidos
     public function cwrCrearItemsPedidosBD($rec)
